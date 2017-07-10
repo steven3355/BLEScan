@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
             else if (!ListPrint.contains(name)){
                 ListPrint.add(name);
                 }
-            //String isplaying = (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No");
             switch(ListPrint.indexOf(name))
             {
                 case 0:
