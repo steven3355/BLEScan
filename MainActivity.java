@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             else if (!ListPrint.contains(name)){
                 ListPrint.add(name);
                 }
+
             switch(ListPrint.indexOf(name))
             {
                 case 0:
