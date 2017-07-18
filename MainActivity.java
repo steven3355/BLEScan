@@ -6,13 +6,16 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     long time = Long.MAX_VALUE;
@@ -33,6 +37,13 @@ public class MainActivity extends AppCompatActivity {
     Button stopScanningButton;
     TextView peripheralTextView;
     TextView peripheralTextView2;
+    ScanFilter mScanFilter;
+    ParcelUuid mServiceUUID;
+    ParcelUuid mServiceDataUUID;
+    ScanFilter.Builder mScanFilterBuilder = new ScanFilter.Builder();
+    ScanSettings mScanSettings;
+    ScanSettings.Builder mScanSettingBuilder = new ScanSettings.Builder();
+    List<ScanFilter> FilterList = new ArrayList<>();
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
@@ -63,6 +74,15 @@ public class MainActivity extends AppCompatActivity {
         btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         btScanner = btAdapter.getBluetoothLeScanner();
+
+        mServiceUUID = ParcelUuid.fromString("00001830-0000-1000-8000-00805F9B34FB");
+        mServiceDataUUID = ParcelUuid.fromString("00009208-0000-1000-8000-00805F9B34FB");
+        mScanFilterBuilder.setServiceUuid(mServiceUUID);
+        mScanFilter = mScanFilterBuilder.build();
+        FilterList.add(mScanFilter);
+
+        mScanSettingBuilder.setScanMode(1);
+        mScanSettings = mScanSettingBuilder.build();
 
 
         if (btAdapter != null && !btAdapter.isEnabled()) {
@@ -109,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
                             "\nTime Stamp = " + result.getTimestampNanos() +
                             "\nTime Elapsed  = "+ (result.getTimestampNanos()-time)/1000000000 +
                             "\nServiceID = " + result.getScanRecord().getServiceUuids().toString().substring(5,9) +
-                            "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No"));
+                            "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No") +
+                            "\nService Data = " + result.getScanRecord().getServiceData(mServiceDataUUID).toString());
 
                             break;
                 case 1:
@@ -164,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                btScanner.startScan(leScanCallback);
+                btScanner.startScan(FilterList, mScanSettings, leScanCallback);
             }
         });
     }
