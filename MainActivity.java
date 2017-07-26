@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         PrepareButtons();
         PrepareScanFilter();
         PrepareScanSetting();
-        
+
         if (btAdapter != null && !btAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             String name=result.getDevice().getName();
             time = Math.min(time, result.getTimestampNanos());
+            mServiceDataUUID = ParcelUuid.fromString("00009208-0000-1000-8000-00805F9B34FB");
             String data= new String(result.getScanRecord().getServiceData(mServiceDataUUID));
             peripheralTextView.setText(
             "Device Name = " + name +
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
     }
     public void PrepareScanFilter(){
         mServiceUUID = ParcelUuid.fromString("00001830-0000-1000-8000-00805F9B34FB");
-        mServiceDataUUID = ParcelUuid.fromString("00009208-0000-1000-8000-00805F9B34FB");
         mScanFilterBuilder.setServiceUuid(mServiceUUID);
         mScanFilter = mScanFilterBuilder.build();
         FilterList.add(mScanFilter);
