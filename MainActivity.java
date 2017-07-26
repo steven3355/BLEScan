@@ -23,20 +23,16 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     long time = Long.MAX_VALUE;
-    HashMap<String, Integer> Cache = new HashMap<>();
-    ArrayList<String> ListPrint = new ArrayList<>();
     BluetoothManager btManager;
     BluetoothAdapter btAdapter;
     BluetoothLeScanner btScanner;
     Button startScanningButton;
     Button stopScanningButton;
     TextView peripheralTextView;
-    TextView peripheralTextView2;
     ScanFilter mScanFilter;
     ParcelUuid mServiceUUID;
     ParcelUuid mServiceDataUUID;
@@ -53,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
-        peripheralTextView2 = (TextView) findViewById(R.id.PeripheralTextView2);
         peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
 
         startScanningButton = (Button) findViewById(R.id.StartScanButton);
@@ -113,36 +108,18 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             String name=result.getDevice().getName();
             time = Math.min(time, result.getTimestampNanos());
+            String data= new String(result.getScanRecord().getServiceData(mServiceDataUUID));
+            //String data2= new String(result.getScanRecord().getServiceData(ParcelUuid.fromString("00009209-0000-1000-8000-00805F9B34FB"))) ;
+            peripheralTextView.setText(
+            "Device Name = " + name +
+            "\nrssi = " + result.getRssi() +
+            "\nAddress = " + result.getDevice().getAddress() +
+            "\nTime Stamp = " + result.getTimestampNanos() +
+            "\nTime Elapsed  = "+ (result.getTimestampNanos()-time)/1000000000 +
+            "\nServiceID = " + result.getScanRecord().getServiceUuids().toString().substring(5,9) +
+            "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No") +
+            "\nService Data = " + data );
 
-            if(name==null)
-                name = "Unnamed";
-            else if (!ListPrint.contains(name)){
-                ListPrint.add(name);
-                }
-
-            switch(ListPrint.indexOf(name))
-            {
-                case 0:
-                            peripheralTextView.setText("Device Name = " + name +
-                            "\nrssi = " + result.getRssi() +
-                            "\nAddress = " + result.getDevice().getAddress() +
-                            "\nTime Stamp = " + result.getTimestampNanos() +
-                            "\nTime Elapsed  = "+ (result.getTimestampNanos()-time)/1000000000 +
-                            "\nServiceID = " + result.getScanRecord().getServiceUuids().toString().substring(5,9) +
-                            "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No") +
-                            "\nService Data = " + result.getScanRecord().getServiceData(mServiceDataUUID).toString());
-
-                            break;
-                case 1:
-                            peripheralTextView2.setText("Device Name = " + name +
-                                    "\nrssi = " + result.getRssi() +
-                                    "\nAddress = " + result.getDevice().getAddress() +
-                                    "\nTime Stamp = " + result.getTimestampNanos() +
-                                    "\nTime Elapsed  = "+ (result.getTimestampNanos()-time)/1000000000 +
-                                    "\nServiceID = " + result.getScanRecord().getServiceUuids().toString().substring(5,9) +
-                                    "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No"));
-                            break;
-            }
 
             // auto scroll for text view
             final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
