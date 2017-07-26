@@ -47,39 +47,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
-        peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
-
-        startScanningButton = (Button) findViewById(R.id.StartScanButton);
-        startScanningButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startScanning();
-            }
-        });
-
-        stopScanningButton = (Button) findViewById(R.id.StopScanButton);
-        stopScanningButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                stopScanning();
-            }
-        });
-        stopScanningButton.setVisibility(View.INVISIBLE);
-
-        btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
-        btAdapter = btManager.getAdapter();
-        btScanner = btAdapter.getBluetoothLeScanner();
-
-        mServiceUUID = ParcelUuid.fromString("00001830-0000-1000-8000-00805F9B34FB");
-        mServiceDataUUID = ParcelUuid.fromString("00009208-0000-1000-8000-00805F9B34FB");
-        mScanFilterBuilder.setServiceUuid(mServiceUUID);
-        mScanFilter = mScanFilterBuilder.build();
-        FilterList.add(mScanFilter);
-
-        mScanSettingBuilder.setScanMode(1);
-        mScanSettings = mScanSettingBuilder.build();
-
-
+        BLESetUpScanner();
+        PrepareButtons();
+        PrepareScanFilter();
+        PrepareScanSetting();
+        
         if (btAdapter != null && !btAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
@@ -109,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             String name=result.getDevice().getName();
             time = Math.min(time, result.getTimestampNanos());
             String data= new String(result.getScanRecord().getServiceData(mServiceDataUUID));
-            //String data2= new String(result.getScanRecord().getServiceData(ParcelUuid.fromString("00009209-0000-1000-8000-00805F9B34FB"))) ;
             peripheralTextView.setText(
             "Device Name = " + name +
             "\nrssi = " + result.getRssi() +
@@ -119,13 +90,6 @@ public class MainActivity extends AppCompatActivity {
             "\nServiceID = " + result.getScanRecord().getServiceUuids().toString().substring(5,9) +
             "\nIs playing game = " + (result.getScanRecord().getServiceUuids().toString().substring(5,9).equals("1830") ? "Yes": "No") +
             "\nService Data = " + data );
-
-
-            // auto scroll for text view
-            final int scrollAmount = peripheralTextView.getLayout().getLineTop(peripheralTextView.getLineCount()) - peripheralTextView.getHeight();
-            // if there is no need to scroll, scrollAmount will be <=0
-            if (scrollAmount > 0)
-                peripheralTextView.scrollTo(0, scrollAmount);
         }
     };
 
@@ -153,7 +117,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    public void PrepareScanFilter(){
+        mServiceUUID = ParcelUuid.fromString("00001830-0000-1000-8000-00805F9B34FB");
+        mServiceDataUUID = ParcelUuid.fromString("00009208-0000-1000-8000-00805F9B34FB");
+        mScanFilterBuilder.setServiceUuid(mServiceUUID);
+        mScanFilter = mScanFilterBuilder.build();
+        FilterList.add(mScanFilter);
+    }
+    public void PrepareScanSetting(){
+        mScanSettingBuilder.setScanMode(1);
+        mScanSettings = mScanSettingBuilder.build();
+    }
+    public void PrepareButtons(){
+        peripheralTextView = (TextView) findViewById(R.id.PeripheralTextView);
+        peripheralTextView.setMovementMethod(new ScrollingMovementMethod());
 
+        startScanningButton = (Button) findViewById(R.id.StartScanButton);
+        startScanningButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startScanning();
+            }
+        });
+
+        stopScanningButton = (Button) findViewById(R.id.StopScanButton);
+        stopScanningButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                stopScanning();
+            }
+        });
+        stopScanningButton.setVisibility(View.INVISIBLE);
+    }
+    public void BLESetUpScanner(){
+        btManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
+        btAdapter = btManager.getAdapter();
+        btScanner = btAdapter.getBluetoothLeScanner();
+    }
     public void startScanning() {
         System.out.println("start scanning");
         peripheralTextView.setText("");
